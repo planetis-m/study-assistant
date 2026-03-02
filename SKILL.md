@@ -52,6 +52,10 @@ Before first OCR call:
 - If `pdfocr` is missing, attempt install by following [references/pdfocr-install.md](references/pdfocr-install.md).
 - Retry `command -v pdfocr` after installation.
 - If still missing, stop and report the failed install attempt plus the exact command/output.
+- Verify credentials:
+  - Prefer `DEEPINFRA_API_KEY` environment variable.
+  - If env key is missing, allow `api_key` in `config.json` next to the real `pdfocr` binary.
+  - If neither is configured, stop and ask user for DeepInfra API key setup.
 
 - Never read PDFs with direct file readers or ad-hoc parsers.
 - Use full document extraction:

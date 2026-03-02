@@ -26,7 +26,10 @@ The skill includes an OCR cache workflow to avoid re-running `pdfocr` for repeat
 ## Requirements
 
 - `pdfocr` must be installed and available on `PATH`
-- PDF OCR API credentials must be configured for your `pdfocr` setup
+- DeepInfra API key must be configured
+  - Recommended: `DEEPINFRA_API_KEY`
+  - Alternative: `api_key` in `config.json` next to `pdfocr`
+  - Precedence: env var overrides `config.json`
 
 ## Missing `pdfocr` Fallback
 
