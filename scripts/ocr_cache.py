@@ -8,6 +8,7 @@ import hashlib
 import json
 import os
 import sys
+import tempfile
 from pathlib import Path
 
 EXIT_OK = 0
@@ -61,17 +62,58 @@ def cmd_store(args: argparse.Namespace) -> int:
     key, raw_path = build_key_and_raw_path(args.pdf_input, args.page_sel)
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
-    bytes_written = 0
-    with raw_path.open("wb") as handle:
-        while True:
-            chunk = sys.stdin.buffer.read(65536)
-            if not chunk:
-                break
-            handle.write(chunk)
-            bytes_written += len(chunk)
+    tmp_path: Path | None = None
+    committed = False
 
-    print(to_json({"key": key, "raw_path": str(raw_path), "bytes_written": bytes_written}))
-    return EXIT_OK
+    try:
+        with tempfile.NamedTemporaryFile("wb", dir=CACHE_DIR, delete=False, prefix=f"{key}.", suffix=".tmp") as handle:
+            tmp_path = Path(handle.name)
+            while True:
+                chunk = sys.stdin.buffer.read(65536)
+                if not chunk:
+                    break
+                handle.write(chunk)
+
+        if tmp_path is None:
+            raise CacheCliError("Error: failed to create temporary cache file.", EXIT_RUNTIME_ERROR)
+
+        with tmp_path.open("r", encoding="utf-8") as handle:
+            for line in handle:
+                line = line.strip()
+                if not line:
+                    continue
+
+                try:
+                    obj = json.loads(line)
+                except json.JSONDecodeError:
+                    print(to_json({"stored": False}))
+                    return EXIT_CACHE_MISS
+
+                status = obj.get("status")
+                if status == "ok":
+                    text = obj.get("text")
+                    if isinstance(text, str) and text:
+                        continue
+                    print(to_json({"stored": False}))
+                    return EXIT_CACHE_MISS
+                else:
+                    print(to_json({"stored": False}))
+                    return EXIT_CACHE_MISS
+
+        if tmp_path.stat().st_size == 0:
+            print(to_json({"stored": False}))
+            return EXIT_CACHE_MISS
+
+        os.replace(tmp_path, raw_path)
+        committed = True
+        print(to_json({"stored": True}))
+        return EXIT_OK
+    finally:
+        if tmp_path is not None and not committed:
+            try:
+                tmp_path.unlink()
+            except FileNotFoundError:
+                pass
 
 
 def cmd_read(args: argparse.Namespace) -> int:
@@ -79,8 +121,6 @@ def cmd_read(args: argparse.Namespace) -> int:
     if not raw_path.exists():
         raise CacheCliError(f"Error: raw cache file not found: {raw_path}", EXIT_CACHE_MISS)
 
-    ok_pages: list[dict[str, object]] = []
-    error_pages: list[dict[str, object]] = []
     ok_text_parts: list[str] = []
 
     with raw_path.open("r", encoding="utf-8") as handle:
@@ -92,32 +132,22 @@ def cmd_read(args: argparse.Namespace) -> int:
             try:
                 obj = json.loads(line)
             except json.JSONDecodeError as exc:
-                error_pages.append({"line": line_no, "page": None, "error": f"invalid_json: {exc.msg}"})
-                continue
+                raise CacheCliError(f"Error: invalid cached JSONL at line {line_no}: {exc.msg}", EXIT_CACHE_MISS)
 
             status = obj.get("status")
-            page = obj.get("page")
             if status == "ok":
                 text = obj.get("text")
                 if isinstance(text, str) and text:
-                    ok_pages.append({"page": page, "text": text})
                     ok_text_parts.append(text)
                 else:
-                    error_pages.append({"line": line_no, "page": page, "error": "ok_status_without_text"})
-            elif status == "error":
-                error_pages.append({"line": line_no, "page": page, "error": obj.get("error", "unknown_error")})
+                    raise CacheCliError(f"Error: invalid cached ok record at line {line_no}", EXIT_CACHE_MISS)
+            else:
+                raise CacheCliError(f"Error: non-ok cached record at line {line_no}", EXIT_CACHE_MISS)
 
-    print(
-        to_json(
-            {
-                "key": key,
-                "raw_path": str(raw_path),
-                "ok_pages": ok_pages,
-                "error_pages": error_pages,
-                "ok_text_concat": "\n\n".join(ok_text_parts),
-            }
-        )
-    )
+    if not ok_text_parts:
+        raise CacheCliError("Error: cached OCR entry has no text.", EXIT_CACHE_MISS)
+
+    print(to_json({"ok_text_concat": "\n\n".join(ok_text_parts)}))
     return EXIT_OK
 
 
@@ -129,8 +159,8 @@ def build_parser() -> argparse.ArgumentParser:
         epilog=(
             "Commands:\n"
             "  check        Return hit/miss for one PDF + page selection\n"
-            "  store        Read OCR JSONL from stdin and write cache file\n"
-            "  read         Parse cached JSONL into ok/error payloads\n\n"
+            "  store        Store OCR JSONL only when all parsed pages are ok\n"
+            "  read         Return concatenated text from cached all-ok JSONL\n\n"
             "Exit codes:\n"
             f"  {EXIT_OK}=success, {EXIT_RUNTIME_ERROR}=runtime error, "
             f"{EXIT_INVALID_ARGS}=invalid arguments, {EXIT_CACHE_MISS}=cache miss"
@@ -140,8 +170,8 @@ def build_parser() -> argparse.ArgumentParser:
     subparsers = parser.add_subparsers(dest="subcommand", required=True)
     for name, fn, help_text in (
         ("check", cmd_check, "Check cache for one PDF/page selection."),
-        ("store", cmd_store, "Store OCR JSONL from stdin into cache."),
-        ("read", cmd_read, "Read one cached JSONL entry."),
+        ("store", cmd_store, "Store OCR JSONL only when all parsed pages are ok."),
+        ("read", cmd_read, "Return concatenated text from one cached all-ok JSONL entry."),
     ):
         sub = subparsers.add_parser(name, help=help_text)
         sub.add_argument("--pdf-input", required=True, help="Path to PDF.")

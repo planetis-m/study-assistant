@@ -26,6 +26,9 @@ The skill includes an OCR cache workflow to avoid re-running `pdfocr` for repeat
 - Cache reference: [references/ocr-cache.md](references/ocr-cache.md)
 - Cache location: `.study-assistant-cache/` in the current workspace
 - Cache files: `.study-assistant-cache/<key>.jsonl`
+- Cached `read` output is minimal: `ok_text_concat` only.
+- Cache is written only for all-ok OCR runs.
+- If OCR has any page/parse error, cache is not written and the next run is a cache miss.
 
 ## Requirements
 

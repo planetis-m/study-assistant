@@ -39,6 +39,8 @@ Workflow:
 - Follow [references/ocr-cache.md](references/ocr-cache.md) for exact command sequence.
 - If cache hit, reuse cached JSONL and skip `pdfocr`.
 - If cache miss, pipe `pdfocr` output into `python3 scripts/ocr_cache.py store`
+- Store cache only when all parsed pages are `status:"ok"` with non-empty text.
+- If any page/parse error appears, treat as non-cacheable and rerun on next request.
 - Re-run OCR when PDF path or page selection changed.
 
 ## Process PDF Input
@@ -69,7 +71,7 @@ Before first OCR call:
   - Treat each line as one JSON object.
   - Keep `"text"` only for records with `"status":"ok"`.
   - Report pages with `"status":"error"` but continue with successful pages.
-  - For cached OCR, use `python3 scripts/ocr_cache.py read` and consume its JSON output.
+  - For cached OCR, use `python3 scripts/ocr_cache.py read` and consume only `ok_text_concat`.
 
 ## Clean OCR Text
 

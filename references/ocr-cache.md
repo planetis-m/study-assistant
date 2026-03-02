@@ -46,6 +46,11 @@ pdfocr "$PDF_INPUT" --pages:"$page_sel" | python3 scripts/ocr_cache.py store \
   --page-sel "$page_sel"
 ```
 
+Interpretation:
+- exit code `0`: all parsed pages succeeded; cache file stored
+- exit code `3`: OCR stream had page/parse errors; cache not stored (treat as miss)
+- exit code `1` or `2`: runtime/argument error, stop and report
+
 ## 4. Reuse Across Modes
 
 When user asks another mode for the same PDF/pages in the same session:
@@ -57,11 +62,10 @@ python3 scripts/ocr_cache.py read \
 ```
 
 Use the JSON response fields:
-- `ok_pages`: list of successful page text payloads
-- `error_pages`: list of OCR/page parsing errors
-- `ok_text_concat`: merged text from all `status:"ok"` records
+- `ok_text_concat`: merged text from all cached `status:"ok"` records
 
 Do not rerun OCR unless `check` returns a miss (`exit 3`).
+Partial OCR runs are not cached.
 
 ## 5. Cache Layout
 
