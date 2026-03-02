@@ -2,51 +2,48 @@
 
 Use this procedure for any mode that starts from a PDF.
 
-## 1. Build Cache Key
+## 1. Set Cache Paths
 
 POSIX shell:
 
 ```bash
-pdf_abs="$(realpath "$PDF_INPUT")"
-pdf_size="$(stat -c %s "$pdf_abs" 2>/dev/null || stat -f %z "$pdf_abs")"
-pdf_mtime="$(stat -c %Y "$pdf_abs" 2>/dev/null || stat -f %m "$pdf_abs")"
-page_sel="${PAGE_SELECTION:-all-pages}"
-cache_key="$(printf '%s|%s|%s|%s\n' "$pdf_abs" "$page_sel" "$pdf_size" "$pdf_mtime" | sha256sum | awk '{print $1}')"
 cache_dir=".study-assistant-cache"
 mkdir -p "$cache_dir"
-cache_raw="$cache_dir/$cache_key.raw.jsonl"
-cache_meta="$cache_dir/$cache_key.meta"
+cache_raw="$cache_dir/current.raw.jsonl"
+cache_meta="$cache_dir/current.meta"
+page_sel="${PAGE_SELECTION:-all-pages}"
 ```
 
 ## 2. Check Cache
 
 ```bash
-if [ -s "$cache_raw" ]; then
+if [ -s "$cache_raw" ] && [ -f "$cache_meta" ] && \
+   grep -Fqx "pdf_input=$PDF_INPUT" "$cache_meta" && \
+   grep -Fqx "page_sel=$page_sel" "$cache_meta"; then
   echo "OCR cache hit: $cache_raw"
 fi
 ```
 
-If `cache_raw` exists and is non-empty, skip `pdfocr`.
+If cache hit, skip `pdfocr`.
 
 ## 3. Populate Cache on Miss
 
 Before running `pdfocr`, request user approval for unrestricted network execution.
 
-Run OCR:
+Write metadata, then run OCR:
 
 ```bash
-# all pages
-pdfocr "$pdf_abs" --all-pages > "$cache_raw"
-# or selected pages
-pdfocr "$pdf_abs" --pages:"$page_sel" > "$cache_raw"
+printf 'pdf_input=%s\npage_sel=%s\n' "$PDF_INPUT" "$page_sel" > "$cache_meta"
+if [ "$page_sel" = "all-pages" ]; then
+  pdfocr "$PDF_INPUT" --all-pages > "$cache_raw"
+else
+  pdfocr "$PDF_INPUT" --pages:"$page_sel" > "$cache_raw"
+fi
 ```
-
-Write `cache_meta` with key inputs and command used.
 
 ## 4. Reuse Across Modes
 
 When user asks another mode for the same PDF/pages in the same session:
-- recompute key
 - load `cache_raw`
 - read JSONL lines directly:
   - use `status:"ok"` lines as content source (`text` field)
@@ -56,7 +53,5 @@ When user asks another mode for the same PDF/pages in the same session:
 ## 5. Invalidation
 
 Treat as miss when any of these change:
-- file path
+- `PDF_INPUT` path
 - page selection
-- file size
-- file mtime

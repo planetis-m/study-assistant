@@ -26,20 +26,16 @@ Map the user request to one mode:
 For PDF-based requests, avoid repeated OCR in the same session by using a local cache.
 
 - Cache directory: `.study-assistant-cache` under current workspace.
-- Cache key inputs:
-  - Absolute PDF path
-  - Page selector (`all-pages` or explicit range string)
-  - Source file `mtime` and `size`
 - Cache files:
-  - `<key>.raw.jsonl`: original `pdfocr` output, one JSON object per page
-  - `<key>.meta`: key inputs for traceability
+  - `current.raw.jsonl`: latest `pdfocr` output, one JSON object per page
+  - `current.meta`: latest request metadata (`pdf_input`, `page_sel`)
 
 Workflow:
 
 - Before OCR, follow [references/ocr-cache.md](references/ocr-cache.md) to check cache.
 - If cache hit, reuse cached JSONL and skip `pdfocr`.
 - If cache miss, run `pdfocr` and write raw JSONL cache for future mode requests.
-- Re-run OCR only when PDF changed or page selection changed.
+- Re-run OCR when PDF path or page selection changed.
 
 ## Process PDF Input
 

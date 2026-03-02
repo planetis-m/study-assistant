@@ -25,8 +25,8 @@ The skill includes an OCR cache workflow to avoid re-running `pdfocr` for repeat
 
 - Cache reference: [references/ocr-cache.md](references/ocr-cache.md)
 - Cache location: `.study-assistant-cache/` in the current workspace
-- Cache format: raw JSONL (`<key>.raw.jsonl`) plus metadata (`<key>.meta`)
-- Invalidation: path/pages/file-size/file-mtime changes
+- Cache format: `current.raw.jsonl` plus `current.meta`
+- Invalidation: PDF path or page selection changes
 
 ## Requirements
 
