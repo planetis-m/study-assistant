@@ -1,6 +1,6 @@
 ---
 name: study-assistant
-description: Study assistant workflow for lecture-slide exam prep using the `pdfocr` CLI. Use when a task involves reading PDF slides, transcribing slide text, cleaning OCR output, and generating exam-focused deliverables such as study notes, lecture-style explanations, ELI5 explanations, flashcards, Mermaid mind maps, quizzes, essay questions, or one-step PDF-to-notes output.
+description: Study assistant workflow for lecture-slide exam prep using the `pdfocr` CLI. Use when a task involves reading PDF slides, transcribing slide text, and generating exam-focused deliverables such as study notes, lecture-style explanations, ELI5 explanations, flashcards, Mermaid mind maps, quizzes, and essay questions.
 ---
 
 # Study Assistant
@@ -14,14 +14,13 @@ Absolute rule: for PDF inputs, never call `read_file` on `.pdf` files. Use shell
 Map the user request to one mode:
 
 - `transcribe`: Convert PDF slides into markdown while keeping educational text verbatim.
-- `analyze`: Generate structured study notes from provided text.
 - `lecture`: Turn provided content into cohesive professor-style teaching narrative.
 - `eli5`: Explain provided material in plain English while keeping technical depth.
 - `flashcard`: Generate two-column markdown flashcards.
 - `mindmap`: Generate Mermaid mindmap only.
 - `quiz`: Generate mixed quiz and answer key.
 - `essay`: Generate 3-4 essay prompts and sample answers.
-- `study-notes`: End-to-end pipeline (OCR from PDF, then generate notes in one pass).
+- `study-notes`: Generate study notes from provided content.
 
 ## Session OCR Cache
 
@@ -92,5 +91,3 @@ Global rules across all modes:
 - Use markdown output.
 - Use LaTeX with `$...$` (inline) and `$$...$$` (display) for math.
 - Do not include conversational intros or conclusions.
-
-For `study-notes`, do OCR and notes generation in one workflow and do not recursively call other mode names.

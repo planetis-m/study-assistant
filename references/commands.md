@@ -15,19 +15,6 @@ Rules:
 - Remove only metadata noise (instructor info, headers/footers, page numbers, timestamps, course codes).
 - Skip fragments that are too broken to read reliably.
 
-## analyze
-
-Goal: Produce exam-focused study notes from provided content.
-
-Rules:
-- Organize by key topics with clear headers.
-- For each topic, include:
-  - Detailed concept explanation
-  - Essential facts/definitions for exams
-  - Connections to other concepts
-- Prefer understanding-oriented explanations over rote memorization.
-- Keep flow logical and progressive.
-
 ## lecture
 
 Goal: Transform content into an engaging professor-style lecture narrative.
@@ -105,9 +92,13 @@ Rules:
 
 ## study-notes
 
-Goal: Complete one-step PDF-to-study-notes pipeline.
+Goal: Produce exam-focused study notes from provided content.
 
 Rules:
-- Run OCR with `pdfocr`, clean OCR text, then generate notes in the same workflow.
-- Apply `analyze` structure requirements for note quality and organization.
-- Do not recurse into other mode commands.
+- Organize notes by key topics with clear headers.
+- For each topic include:
+  - Detailed concept explanation
+  - Essential facts and definitions for exams
+  - Connections to other concepts
+- Prefer understanding-oriented explanations over rote memorization.
+- Keep flow logical and progressive.
