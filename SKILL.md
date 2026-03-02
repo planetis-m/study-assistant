@@ -1,6 +1,6 @@
 ---
 name: study-assistant
-description: Study assistant workflow for lecture-slide exam prep using the `pdfocr` CLI. Use when a task involves processing PDF slides via shell `pdfocr` (never ReadFile on `.pdf`), transcribing slide text, cleaning OCR output, and generating exam-focused deliverables such as study notes, lecture-style explanations, ELI5 explanations, flashcards, Mermaid mind maps, quizzes, essay questions, or one-step PDF-to-notes output.
+description: Study assistant workflow for lecture-slide exam prep using the `pdfocr` CLI. Use when a task involves OCRing PDF slides with `pdfocr`, cleaning OCR output, and generating exam-focused deliverables such as study notes, lecture-style explanations, ELI5 explanations, flashcards, Mermaid mind maps, quizzes, essay questions, or one-step PDF-to-notes output.
 ---
 
 # Study Assistant
