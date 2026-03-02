@@ -31,15 +31,14 @@ For PDF-based requests, avoid repeated OCR in the same session by using a local 
   - Page selector (`all-pages` or explicit range string)
   - Source file `mtime` and `size`
 - Cache files:
-  - `<key>.txt`: concatenated OCR text from successful pages
-  - `<key>.errors.txt`: page-level OCR failures, if any
+  - `<key>.raw.jsonl`: original `pdfocr` output, one JSON object per page
   - `<key>.meta`: key inputs for traceability
 
 Workflow:
 
 - Before OCR, follow [references/ocr-cache.md](references/ocr-cache.md) to check cache.
-- If cache hit, reuse cached text and skip `pdfocr`.
-- If cache miss, run `pdfocr`, parse JSONL, then write cache files for future mode requests.
+- If cache hit, reuse cached JSONL and skip `pdfocr`.
+- If cache miss, run `pdfocr` and write raw JSONL cache for future mode requests.
 - Re-run OCR only when PDF changed or page selection changed.
 
 ## Process PDF Input
@@ -71,6 +70,7 @@ Before first OCR call:
   - Treat each line as one JSON object.
   - Keep `"text"` only for records with `"status":"ok"`.
   - Report pages with `"status":"error"` but continue with successful pages.
+  - Read cached `.raw.jsonl` directly; do not generate extra parsed cache files.
 
 ## Clean OCR Text
 
