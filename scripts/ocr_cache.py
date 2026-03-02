@@ -8,6 +8,7 @@ import hashlib
 import json
 import os
 import sys
+import tempfile
 from pathlib import Path
 
 EXIT_OK = 0
@@ -17,7 +18,6 @@ EXIT_CACHE_MISS = 3
 
 CACHE_DIR = Path(".study-assistant-cache")
 DEFAULT_PAGE_SEL = "all-pages"
-TMP_JSONL_NAME = ".ocr-tmp.jsonl"
 
 
 class CacheCliError(Exception):
@@ -86,25 +86,39 @@ def validate_jsonl_file(input_jsonl: Path) -> None:
 def cmd_store(args: argparse.Namespace) -> int:
     _, raw_path = build_key_and_raw_path(args.pdf_input, args.page_sel)
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
-    tmp_jsonl = CACHE_DIR / TMP_JSONL_NAME
-    if not tmp_jsonl.exists() or not tmp_jsonl.is_file():
-        raise CacheCliError(f"Error: temporary OCR file not found: {tmp_jsonl}", EXIT_INVALID_ARGS)
+    tmp_jsonl: Path | None = None
+    committed = False
 
     try:
-        validate_jsonl_file(tmp_jsonl)
-    except CacheCliError as exc:
-        if exc.exit_code == EXIT_CACHE_MISS:
+        with tempfile.NamedTemporaryFile("wb", dir=CACHE_DIR, delete=False, prefix=".ocr-store.", suffix=".jsonl") as handle:
+            tmp_jsonl = Path(handle.name)
+            while True:
+                chunk = sys.stdin.buffer.read(65536)
+                if not chunk:
+                    break
+                handle.write(chunk)
+
+        if tmp_jsonl is None:
+            raise CacheCliError("Error: failed to create temporary cache file.", EXIT_RUNTIME_ERROR)
+
+        try:
+            validate_jsonl_file(tmp_jsonl)
+        except CacheCliError as exc:
+            if exc.exit_code == EXIT_CACHE_MISS:
+                print(to_json({"stored": False}))
+                return EXIT_CACHE_MISS
+            raise
+
+        os.replace(tmp_jsonl, raw_path)
+        committed = True
+        print(to_json({"stored": True}))
+        return EXIT_OK
+    finally:
+        if tmp_jsonl is not None and not committed:
             try:
                 tmp_jsonl.unlink()
             except FileNotFoundError:
                 pass
-            print(to_json({"stored": False}))
-            return EXIT_CACHE_MISS
-        raise
-
-    os.replace(tmp_jsonl, raw_path)
-    print(to_json({"stored": True}))
-    return EXIT_OK
 
 
 def cmd_read(args: argparse.Namespace) -> int:
@@ -150,7 +164,7 @@ def build_parser() -> argparse.ArgumentParser:
         epilog=(
             "Commands:\n"
             "  check        Return hit/miss for one PDF + page selection\n"
-            "  store        Validate fixed temp OCR JSONL and store on all-ok\n"
+            "  store        Read OCR JSONL from stdin, validate, store on all-ok\n"
             "  read         Return concatenated text from cached all-ok JSONL\n\n"
             "Exit codes:\n"
             f"  {EXIT_OK}=success, {EXIT_RUNTIME_ERROR}=runtime error, "
@@ -161,7 +175,7 @@ def build_parser() -> argparse.ArgumentParser:
     subparsers = parser.add_subparsers(dest="subcommand", required=True)
     for name, fn, help_text in (
         ("check", cmd_check, "Check cache for one PDF/page selection."),
-        ("store", cmd_store, "Validate fixed temp OCR JSONL and store on all-ok."),
+        ("store", cmd_store, "Read OCR JSONL from stdin, validate, store on all-ok."),
         ("read", cmd_read, "Return concatenated text from one cached all-ok JSONL entry."),
     ):
         sub = subparsers.add_parser(name, help=help_text)

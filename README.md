@@ -27,7 +27,8 @@ The skill includes an OCR cache workflow to avoid re-running `pdfocr` for repeat
 - Cache location: `.study-assistant-cache/` in the current workspace
 - Cache files: `.study-assistant-cache/<key>.jsonl`
 - Cached `read` output is minimal: `ok_text_concat` only.
-- Cache fill is no-pipe: write OCR output to fixed temp `.study-assistant-cache/.ocr-tmp.jsonl`, then run `store`.
+- Cache fill uses a pipe: stream `pdfocr` JSONL into `store`.
+- `store` validates and writes with internal temp-file + atomic replace.
 - Cache is written only for all-ok OCR runs.
 - If OCR has any page/parse error, cache is not written and the next run is a cache miss.
 

@@ -30,18 +30,9 @@ Map the user request to one mode:
 
 For PDF-based requests, avoid repeated OCR in the same session by using a local cache.
 
-- Cache directory: `.study-assistant-cache` under current workspace.
-- Raw JSONL entries: `.study-assistant-cache/<key>.jsonl`
-
-Workflow:
-
-- Before OCR, run cache operations only through `python3 scripts/ocr_cache.py`.
-- Follow [references/ocr-cache.md](references/ocr-cache.md) for exact command sequence.
-- If cache hit, reuse cached JSONL and skip `pdfocr`.
-- If cache miss, write `pdfocr` output to fixed temp `.study-assistant-cache/.ocr-tmp.jsonl`, then run `store`.
-- Store cache only when all parsed pages are `status:"ok"` with non-empty text.
-- If any page/parse error appears, treat as non-cacheable and rerun on next request.
-- Re-run OCR when PDF path or page selection changed.
+- Use only `python3 scripts/ocr_cache.py` for cache operations.
+- Follow [references/ocr-cache.md](references/ocr-cache.md) for the exact command sequence.
+- Re-run OCR only on cache miss or when PDF path/page selection changes.
 
 ## Process PDF Input
 
