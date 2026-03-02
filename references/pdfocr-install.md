@@ -2,6 +2,11 @@
 
 Use this only when `command -v pdfocr` fails.
 
+Path policy:
+- Use absolute user paths only (`$HOME/.local/...`).
+- Never install into a relative workspace path such as `./.local/...`.
+- Never create `.local` under the current project directory.
+
 As of February 28, 2026 (`pdfocr` v0.2.6), release assets exist for:
 - Linux `x86_64`
 - macOS `arm64`
@@ -98,5 +103,6 @@ Edit `config.json` in the same directory as the real `pdfocr` executable and set
 
 - Keep all extracted runtime files (`config.json`, `libpdfium`, and platform shared libs) with the real binary.
 - Do not copy only `pdfocr`/`pdfocr.exe` into another directory without its bundled runtime files.
+- Ensure install targets are under user home (`$HOME/.local` or `%USERPROFILE%\.local`), not the current workspace.
 - If install fails due to permissions, retry in a user-writable location as shown above.
 - If platform/architecture is unsupported, stop and ask the user for manual installation steps.
