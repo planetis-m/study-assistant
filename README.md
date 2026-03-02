@@ -36,6 +36,7 @@ The skill includes an OCR cache workflow to avoid re-running `pdfocr` for repeat
   - Alternative: `api_key` in `config.json` next to `pdfocr`
   - Precedence: env var overrides `config.json`
   - Runtime flow is OCR-first: run OCR, then handle auth/config errors if reported
+  - Agents should not inspect env/profile/files to discover keys; they should only surface OCR auth errors and request user setup
 
 ## Missing `pdfocr` Fallback
 

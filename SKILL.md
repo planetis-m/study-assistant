@@ -7,6 +7,8 @@ description: Study assistant workflow for lecture-slide exam prep using the `pdf
 
 Follow this workflow exactly to convert lecture material into exam-ready outputs.
 
+Absolute rule: for PDF inputs, never call `read_file` on `.pdf` files. Use shell checks plus `pdfocr` only.
+
 ## Select Mode
 
 Map the user request to one mode:
@@ -52,8 +54,9 @@ Before first OCR call:
   - Request unrestricted network/escalated execution first.
   - Do not run a sandboxed `pdfocr` attempt as a probe when network access is required.
 - Do not run shell preflight checks for credentials.
+  - Do not inspect environment variables, shell profiles, or filesystem files to discover API keys.
   - Run OCR directly after permission.
-  - If OCR indicates auth/config failure, ask user to set `DEEPINFRA_API_KEY` or `api_key` in `config.json` next to the real `pdfocr` binary.
+  - If OCR indicates auth/config failure, report the error and ask the user to configure `DEEPINFRA_API_KEY` or `api_key` in `config.json` next to the real `pdfocr` binary, then retry.
 
 - Never read PDFs with direct file readers or ad-hoc parsers.
 - Use full document extraction:
