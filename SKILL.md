@@ -25,6 +25,13 @@ Map the user request to one mode:
 
 If the source is a PDF, always run `pdfocr` through shell execution.
 
+Before first OCR call:
+
+- Check availability with `command -v pdfocr`.
+- If `pdfocr` is missing, attempt install by following [references/pdfocr-install.md](references/pdfocr-install.md).
+- Retry `command -v pdfocr` after installation.
+- If still missing, stop and report the failed install attempt plus the exact command/output.
+
 - Never read PDFs with direct file readers or ad-hoc parsers.
 - Use full document extraction:
   - `pdfocr INPUT.pdf --all-pages`

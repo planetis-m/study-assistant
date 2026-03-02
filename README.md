@@ -20,6 +20,16 @@ The skill is optimized for PDF slides via the `pdfocr` CLI.
 - `pdfocr` must be installed and available on `PATH`
 - PDF OCR API credentials must be configured for your `pdfocr` setup
 
+## Missing `pdfocr` Fallback
+
+The skill now includes dependency bootstrap instructions so an agent can attempt installation when `pdfocr` is missing.
+
+- See [references/pdfocr-install.md](references/pdfocr-install.md)
+- Flow used by the skill:
+1. `command -v pdfocr`
+2. If missing, run platform-specific install commands from the reference file
+3. Re-check `command -v pdfocr` and continue OCR only when available
+
 ## Install In Codex
 
 Codex docs recommend installing non-built-in skills with `$skill-installer`.
@@ -64,4 +74,5 @@ Use $study-skill in quiz mode on this transcribed content: ...
 
 - `SKILL.md`: main instructions and trigger metadata
 - `references/commands.md`: mode-specific generation rules
+- `references/pdfocr-install.md`: `pdfocr` install fallback
 - `agents/openai.yaml`: UI metadata and default prompt
