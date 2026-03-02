@@ -57,6 +57,9 @@ Before first OCR call:
   - Prefer `DEEPINFRA_API_KEY` environment variable.
   - If env key is missing, allow `api_key` in `config.json` next to the real `pdfocr` binary.
   - If neither is configured, stop and ask user for DeepInfra API key setup.
+- Ask user permission before every networked OCR execution:
+  - Request unrestricted network/escalated execution first.
+  - Do not run a sandboxed `pdfocr` attempt as a probe when network access is required.
 
 - Never read PDFs with direct file readers or ad-hoc parsers.
 - Use full document extraction:

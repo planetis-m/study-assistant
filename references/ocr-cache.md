@@ -32,6 +32,8 @@ If `cache_text` exists and is non-empty, skip `pdfocr`.
 
 ## 3. Populate Cache on Miss
 
+Before running `pdfocr`, request user approval for unrestricted network execution.
+
 Run OCR:
 
 ```bash

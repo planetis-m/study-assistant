@@ -15,6 +15,10 @@ It provides one workflow with multiple modes:
 
 The skill is optimized for PDF slides via the `pdfocr` CLI.
 
+## Permission Behavior
+
+For OCR runs, the skill is instructed to ask for unrestricted network permission before executing `pdfocr` (instead of running a failing sandbox probe first).
+
 ## Session OCR Reuse
 
 The skill includes an OCR cache workflow to avoid re-running `pdfocr` for repeated mode requests on the same PDF/pages in one session.
