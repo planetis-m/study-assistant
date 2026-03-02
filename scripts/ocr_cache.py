@@ -17,6 +17,7 @@ EXIT_CACHE_MISS = 3
 
 CACHE_DIR = Path(".study-assistant-cache")
 DEFAULT_PAGE_SEL = "all-pages"
+TMP_JSONL_NAME = ".ocr-tmp.jsonl"
 
 
 class CacheCliError(Exception):
@@ -82,20 +83,27 @@ def validate_jsonl_file(input_jsonl: Path) -> None:
         raise CacheCliError("Error: OCR JSONL has no ok text.", EXIT_CACHE_MISS)
 
 
-def cmd_validate(args: argparse.Namespace) -> int:
-    input_jsonl = Path(os.path.expanduser(args.input_jsonl))
-    if not input_jsonl.exists() or not input_jsonl.is_file():
-        raise CacheCliError(f"Error: --input-jsonl file not found: {input_jsonl}", EXIT_INVALID_ARGS)
+def cmd_store(args: argparse.Namespace) -> int:
+    _, raw_path = build_key_and_raw_path(args.pdf_input, args.page_sel)
+    CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    tmp_jsonl = CACHE_DIR / TMP_JSONL_NAME
+    if not tmp_jsonl.exists() or not tmp_jsonl.is_file():
+        raise CacheCliError(f"Error: temporary OCR file not found: {tmp_jsonl}", EXIT_INVALID_ARGS)
 
     try:
-        validate_jsonl_file(input_jsonl)
+        validate_jsonl_file(tmp_jsonl)
     except CacheCliError as exc:
         if exc.exit_code == EXIT_CACHE_MISS:
-            print(to_json({"valid": False}))
+            try:
+                tmp_jsonl.unlink()
+            except FileNotFoundError:
+                pass
+            print(to_json({"stored": False}))
             return EXIT_CACHE_MISS
         raise
 
-    print(to_json({"valid": True}))
+    os.replace(tmp_jsonl, raw_path)
+    print(to_json({"stored": True}))
     return EXIT_OK
 
 
@@ -142,7 +150,7 @@ def build_parser() -> argparse.ArgumentParser:
         epilog=(
             "Commands:\n"
             "  check        Return hit/miss for one PDF + page selection\n"
-            "  validate     Validate OCR JSONL contains only non-empty ok records\n"
+            "  store        Validate fixed temp OCR JSONL and store on all-ok\n"
             "  read         Return concatenated text from cached all-ok JSONL\n\n"
             "Exit codes:\n"
             f"  {EXIT_OK}=success, {EXIT_RUNTIME_ERROR}=runtime error, "
@@ -153,16 +161,13 @@ def build_parser() -> argparse.ArgumentParser:
     subparsers = parser.add_subparsers(dest="subcommand", required=True)
     for name, fn, help_text in (
         ("check", cmd_check, "Check cache for one PDF/page selection."),
+        ("store", cmd_store, "Validate fixed temp OCR JSONL and store on all-ok."),
         ("read", cmd_read, "Return concatenated text from one cached all-ok JSONL entry."),
     ):
         sub = subparsers.add_parser(name, help=help_text)
         sub.add_argument("--pdf-input", required=True, help="Path to PDF.")
         sub.add_argument("--page-sel", default=DEFAULT_PAGE_SEL, help=f'Page selection (default: "{DEFAULT_PAGE_SEL}").')
         sub.set_defaults(func=fn)
-
-    validate_sub = subparsers.add_parser("validate", help="Validate OCR JSONL has only non-empty ok records.")
-    validate_sub.add_argument("--input-jsonl", required=True, help="Path to OCR JSONL output file.")
-    validate_sub.set_defaults(func=cmd_validate)
 
     return parser
 

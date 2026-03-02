@@ -11,7 +11,7 @@ Absolute rule: for PDF inputs, never call `read_file` on `.pdf` files. Use shell
 
 ## Available scripts
 
-- `scripts/ocr_cache.py` - Manages OCR cache operations (`check`, `validate`, `read`).
+- `scripts/ocr_cache.py` - Manages OCR cache operations (`check`, `store`, `read`).
 
 ## Select Mode
 
@@ -38,7 +38,7 @@ Workflow:
 - Before OCR, run cache operations only through `python3 scripts/ocr_cache.py`.
 - Follow [references/ocr-cache.md](references/ocr-cache.md) for exact command sequence.
 - If cache hit, reuse cached JSONL and skip `pdfocr`.
-- If cache miss, write `pdfocr` output to a temp JSONL file, validate it, then move it to cache path.
+- If cache miss, write `pdfocr` output to fixed temp `.study-assistant-cache/.ocr-tmp.jsonl`, then run `store`.
 - Store cache only when all parsed pages are `status:"ok"` with non-empty text.
 - If any page/parse error appears, treat as non-cacheable and rerun on next request.
 - Re-run OCR when PDF path or page selection changed.

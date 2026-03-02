@@ -31,11 +31,6 @@ Interpretation:
 - exit code `3`: cache miss, continue to step 3
 - exit code `1` or `2`: runtime/argument error, stop and report
 
-On cache miss, copy `raw_path` from the JSON output and set it explicitly:
-```bash
-RAW_PATH=".study-assistant-cache/<key>.jsonl"
-```
-
 ## 3. Populate Cache on Miss (No Pipe)
 
 Before running `pdfocr`, request user approval for unrestricted network execution.
@@ -46,25 +41,17 @@ mkdir -p "$cache_dir"
 TMP_JSONL=".study-assistant-cache/.ocr-tmp.jsonl"
 
 pdfocr "$PDF_INPUT" --pages:"$page_sel" > "$TMP_JSONL"
-python3 scripts/ocr_cache.py validate --input-jsonl "$TMP_JSONL"
+python3 scripts/ocr_cache.py store \
+  --pdf-input "$PDF_INPUT" \
+  --page-sel "$page_sel"
 ```
 
 Interpretation:
-- exit code `0`: all parsed pages are valid `status:"ok"` with non-empty text
+- exit code `0`: OCR output was all-ok and cached
 - exit code `3`: OCR output is non-cacheable (page/parse errors or empty)
 - exit code `1` or `2`: runtime/argument error, stop and report
 
-Commit on valid output:
-
-```bash
-mv "$TMP_JSONL" "$RAW_PATH"
-```
-
-Cleanup on invalid output:
-
-```bash
-rm -f "$TMP_JSONL"
-```
+`store` reads fixed `.study-assistant-cache/.ocr-tmp.jsonl` and is the only cache writer.
 
 ## 4. Reuse Across Modes
 
