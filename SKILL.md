@@ -1,13 +1,11 @@
 ---
 name: study-assistant
-description: Study assistant workflow for lecture-slide exam prep using the `pdfocr` CLI. Use when a task involves OCRing PDF slides with `pdfocr`, cleaning OCR output, and generating exam-focused deliverables such as study notes, lecture-style explanations, ELI5 explanations, flashcards, Mermaid mind maps, quizzes, essay questions, or one-step PDF-to-notes output.
+description: Study assistant workflow for lecture-slide exam prep using the `pdfocr` CLI. Use when a task involves reading PDF slides, transcribing slide text, cleaning OCR output, and generating exam-focused deliverables such as study notes, lecture-style explanations, ELI5 explanations, flashcards, Mermaid mind maps, quizzes, essay questions, or one-step PDF-to-notes output.
 ---
 
 # Study Assistant
 
 Follow this workflow exactly to convert lecture material into exam-ready outputs.
-
-Absolute rule: for PDF inputs, never call `ReadFile` on `.pdf` files. Use shell checks plus `pdfocr` only.
 
 ## Select Mode
 
@@ -42,13 +40,6 @@ Workflow:
 ## Process PDF Input
 
 If the source is a PDF, always run `pdfocr` through shell execution.
-
-Hard guardrails:
-
-- Never call `ReadFile` on any `.pdf` file.
-- Never call generic file-reading tools on PDF binaries.
-- Validate PDF path existence only with shell checks (for example: `[ -f "$PDF_INPUT" ]`).
-- Read only text inputs and OCR cache files (`.study-assistant-cache/current.meta`, `.study-assistant-cache/current.raw.jsonl`).
 
 Before first OCR call:
 

@@ -2,11 +2,6 @@
 
 Use this procedure for any mode that starts from a PDF.
 
-Guardrails:
-- Never call `ReadFile` on `.pdf` files.
-- Do not parse PDF content with non-`pdfocr` readers.
-- Check file existence with shell only (`[ -f "$PDF_INPUT" ]`).
-
 ## 1. Set Cache Paths
 
 POSIX shell:
