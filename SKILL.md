@@ -31,6 +31,8 @@ For PDF-based requests, avoid repeated OCR in the same session by using a local 
 - Use only `python3 scripts/ocr_cache.py` for cache operations.
 - Follow [references/ocr-cache.md](references/ocr-cache.md) for the exact command sequence.
 - Re-run OCR only on cache miss or when PDF path/page selection changes.
+- Do not list files to find the script or inspect the `.study-assistant-cache` directory.
+- Always execute from the user's current working directory. Do not `cd` into the skill directory.
 
 ## Process PDF Input
 
@@ -39,7 +41,7 @@ If the source is a PDF, always run `pdfocr` through shell execution.
 Before first OCR call:
 
 - Check availability with `command -v pdfocr`.
-- If `pdfocr` is missing, attempt install by following [references/pdfocr-install.md](references/pdfocr-install.md).
+- If `pdfocr` is missing, **only then** read [references/pdfocr-install.md](references/pdfocr-install.md) to attempt install. Do not read this file if `pdfocr` is already available.
 - Install only to user-home absolute paths (`$HOME/.local/...`), never `./.local` in workspace.
 - Retry `command -v pdfocr` after installation.
 - If still missing, stop and report the failed install attempt plus the exact command/output.
@@ -56,12 +58,10 @@ Before first OCR call:
   - `pdfocr INPUT.pdf --all-pages`
 - If page ranges are provided, pass them to `pdfocr`:
   - `pdfocr INPUT.pdf --pages:"8-20,22-27"`
-- Obtain OCR Text:
-  - **Primary (Cache Hit / Clean Store):** Consume the formatted `<page>` text directly from `python3 scripts/ocr_cache.py read`.
-  - **Fallback (Partial/Error PDF):** If the cache `store` command refuses to save (returns code `3`), you must run `pdfocr` directly without the cache and parse its stdout as JSONL:
-    - Treat each line as one JSON object.
-    - Keep `"text"` only for records with `"status":"ok"`.
-    - Report pages with `"status":"error"` to the user, but continue generating the study material with the successful pages.
+- Parse stdout as JSONL (Fallback only if cache `store` returns code 3):
+  - Treat each line as one JSON object.
+  - Keep `"text"` only for records with `"status":"ok"`.
+  - Report pages with `"status":"error"` but continue with successful pages.
 
 ## Clean OCR Text
 
