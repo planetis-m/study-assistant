@@ -29,26 +29,27 @@ For PDF-based requests, use the caching procedure to avoid repeated OCR executio
 
 ## Process PDF Input
 
-If the source is a PDF, always run `pdfocr` through shell execution.
+If the source is a PDF, extract text exclusively through `pdfocr` shell execution.
+Never read PDFs with direct file readers or ad-hoc parsers.
 
-Before first OCR call:
+### Installation
 
-- Check availability with `command -v pdfocr`.
-- If `pdfocr` is missing, read the file `references/pdfocr-install.md` to attempt installation.
-- Install only to user-home absolute paths (`$HOME/.local/...`), never `./.local` in workspace.
-- Retry `command -v pdfocr` after installation.
-- If still missing, stop and report the failed install attempt plus the exact command/output.
-- When executing networked OCR via tool calls:
-  - Request unrestricted network/escalated execution directly in the tool call.
-  - Do not run a sandboxed `pdfocr` attempt as a probe.
-- Do not run shell preflight checks for credentials.
-  - Do not inspect environment variables, shell profiles, or filesystem files to discover API keys.
-  - If OCR indicates auth/config failure, report the error and ask the user to configure `DEEPINFRA_API_KEY` or `api_key` in `config.json` next to the real `pdfocr` binary, then retry.
-- Never read PDFs with direct file readers or ad-hoc parsers.
-- Use full document extraction:
-  - `pdfocr INPUT.pdf --all-pages`
-- If page ranges are provided, pass them to `pdfocr`:
-  - `pdfocr INPUT.pdf --pages:"8-20,22-27"`
+- Check with `command -v pdfocr`.
+- If missing, read `references/pdfocr-install.md` and attempt installation.
+- Retry `command -v pdfocr` after installation. If still missing, stop and report.
+
+### Execution
+
+- Request unrestricted network/escalated execution directly in the tool call.
+  Do not run a sandboxed `pdfocr` attempt as a probe.
+- Do not inspect environment variables, shell profiles, or filesystem files to discover API keys.
+  If OCR reports an auth/config failure, report the error and ask the user to configure
+  `DEEPINFRA_API_KEY` or `config.json`, then retry.
+
+### Usage
+
+- Full document: `pdfocr INPUT.pdf --all-pages`
+- Page ranges: `pdfocr INPUT.pdf --pages:"8-20,22-27"`
 
 ## Clean OCR Text
 
