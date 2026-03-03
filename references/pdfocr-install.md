@@ -64,41 +64,19 @@ pdfocr --help | Out-Null
 
 ## DeepInfra API key configuration
 
-`pdfocr` supports both env var and `config.json`:
-- `DEEPINFRA_API_KEY` (recommended)
-- `config.json` `api_key` field next to the `pdfocr` binary
+`pdfocr` requires an API key. Do not attempt to read or verify keys yourself. If the tool reports an auth error, present these instructions to the user:
 
-Precedence:
-- If `DEEPINFRA_API_KEY` is set, it overrides `config.json.api_key`.
+**Recommended: environment variable**
+Linux/macOS: `export DEEPINFRA_API_KEY="your_api_key"`
+Windows PowerShell: `$env:DEEPINFRA_API_KEY = "your_api_key"`
 
-### Recommended: environment variable
-
-Linux/macOS (current shell):
-
-```bash
-export DEEPINFRA_API_KEY="your_deepinfra_api_key"
-```
-
-Windows PowerShell (current session):
-
-```powershell
-$env:DEEPINFRA_API_KEY = "your_deepinfra_api_key"
-```
-
-### Alternative: update config.json
-
-Edit `config.json` in the same directory as the real `pdfocr` executable and set:
-
+**Alternative: update config.json**
+Create or edit `config.json` inside the directory where the real binary lives (e.g., `~/.local/opt/pdfocr/current/`) and set:
 ```json
 {
   "api_key": "your_deepinfra_api_key"
 }
 ```
-
-### Credential detection rule
-
-- Check `config.json` next to the actual `pdfocr` binary file.
-- If `~/.local/bin/pdfocr` is a symlink, use the binary directory under `~/.local/opt/pdfocr/current/`.
 
 ## Notes
 
