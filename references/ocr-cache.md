@@ -1,64 +1,40 @@
 # OCR Cache Procedure
 
-Use this procedure for any mode that starts from a PDF.
+Use this procedure for any mode that starts from a PDF to avoid redundant OCR execution.
+All cache operations must use `python3 scripts/ocr_cache.py`.
 
-All cache functions must go through `python3 scripts/ocr_cache.py`.
-
-## 1. Validate Input and Normalize Page Selection
-
-```bash
-PDF_INPUT="path/to/file.pdf"
-PAGE_SELECTION=""
-```
-
-## 2. Check Cache
+## 1. Check Cache
 
 ```bash
-python3 scripts/ocr_cache.py check \
-  --pdf-input "$PDF_INPUT" \
-  --page-sel "$PAGE_SELECTION"
+python3 scripts/ocr_cache.py check --pdf-input "path/to/file.pdf" --page-sel "1-5"
 ```
+*(Leave `--page-sel` empty or omit it for full documents).*
 
-Interpretation:
-- `0`: cache hit, skip OCR and use `read`
-- `3`: cache miss, continue to step 3
-- `1` or `2`: runtime/argument error, stop and report
+**Exit codes:**
+- `0`: Cache hit. Skip to **Step 3 (Read)**.
+- `3`: Cache miss. Continue to **Step 2 (Store)**.
+- `1` or `2`: Error. Stop and report.
 
-## 3. Populate Cache on Miss (Pipe to `store`)
+## 2. Populate Cache on Miss
 
-`store` reads OCR JSONL from stdin, validates all-or-nothing, writes cache via internal temp file + atomic replace.
-
-Use one OCR command argument:
-- `--all-pages` when `PAGE_SELECTION` is empty
-- `--pages:"$PAGE_SELECTION"` when a range is provided
+Run `pdfocr` and pipe its JSONL output directly into the `store` command. 
+Use `--all-pages` if no page selection is provided, or `--pages:"..."` if a range is specified.
 
 ```bash
-pdfocr "$PDF_INPUT" <OCR_PAGE_ARG> | python3 scripts/ocr_cache.py store \
-  --pdf-input "$PDF_INPUT" \
-  --page-sel "$PAGE_SELECTION"
+pdfocr "path/to/file.pdf" <OCR_PAGE_ARG> | python3 scripts/ocr_cache.py store --pdf-input "path/to/file.pdf" --page-sel "1-5"
 ```
 
-Interpretation:
-- `0`: OCR output was all-ok and cached
-- `3`: OCR output is non-cacheable (page/parse errors or empty)
-- `1` or `2`: runtime/argument error, stop and report
+**Exit codes:**
+- `0`: OCR output was clean and successfully cached. Continue to **Step 3 (Read)**.
+- `3`: OCR output is non-cacheable (page/parse errors).
+- `1` or `2`: Error. Stop and report.
 
-## 4. Reuse Across Modes
+## 3. Read Cached Text
 
 ```bash
-python3 scripts/ocr_cache.py read \
-  --pdf-input "$PDF_INPUT" \
-  --page-sel "$PAGE_SELECTION"
+python3 scripts/ocr_cache.py read --pdf-input "path/to/file.pdf" --page-sel "1-5"
 ```
 
-Use the JSON response field:
-- `ok_text_concat`: merged text from all cached `status:"ok"` records
+This will print the extracted document directly to stdout, organized with `<page>` markers. Consume this raw text directly for the requested study mode.
 
-Do not rerun OCR unless `check` returns miss (`3`).
-Partial OCR runs are not cached.
-
-## 5. Cache Layout
-
-- Raw JSONL entries: `.study-assistant-cache/<key>.jsonl`
-
-The key is derived from normalized `pdf_input + page_sel`.
+*(Note: Do not rerun OCR unless `check` returns a miss (`3`). Do not attempt to read the internal cache files directly).*
