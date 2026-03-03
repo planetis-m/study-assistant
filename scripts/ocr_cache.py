@@ -60,12 +60,16 @@ def print_formatted(filename: str, pages: list[dict]) -> None:
     print("\n".join(result))
 
 def cmd_check(args: argparse.Namespace) -> int:
-    key, raw_path = build_key_and_raw_path(args.pdf_input, args.page_sel)
+    _, raw_path = build_key_and_raw_path(args.pdf_input, args.page_sel)
     cache_hit = raw_path.exists() and raw_path.stat().st_size > 0
     
-    payload = {"cache_hit": cache_hit, "key": key, "raw_path": str(raw_path)}
-    print(json.dumps(payload, ensure_ascii=True, separators=(",", ":")))
-    return EXIT_OK if cache_hit else EXIT_CACHE_MISS
+    # Do not print the raw path or JSON. Just print a plain status.
+    if cache_hit:
+        print("Status: Cache hit.")
+        return EXIT_OK
+    else:
+        print("Status: Cache miss.")
+        return EXIT_CACHE_MISS
 
 def cmd_store(args: argparse.Namespace) -> int:
     _, raw_path = build_key_and_raw_path(args.pdf_input, args.page_sel)

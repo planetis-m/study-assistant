@@ -49,7 +49,6 @@ Before first OCR call:
   - Do not inspect environment variables, shell profiles, or filesystem files to discover API keys.
   - Run OCR directly after permission.
   - If OCR indicates auth/config failure, report the error and ask the user to configure `DEEPINFRA_API_KEY` or `api_key` in `config.json` next to the real `pdfocr` binary, then retry.
-
 - Never read PDFs with direct file readers or ad-hoc parsers.
 - Use full document extraction:
   - `pdfocr INPUT.pdf --all-pages`
