@@ -38,12 +38,11 @@ Before first OCR call:
 - Install only to user-home absolute paths (`$HOME/.local/...`), never `./.local` in workspace.
 - Retry `command -v pdfocr` after installation.
 - If still missing, stop and report the failed install attempt plus the exact command/output.
-- Ask user permission before every networked OCR execution:
-  - Request unrestricted network/escalated execution first.
-  - Do not run a sandboxed `pdfocr` attempt as a probe when network access is required.
+- When executing networked OCR via tool calls:
+  - Request unrestricted network/escalated execution directly in the tool call.
+  - Do not run a sandboxed `pdfocr` attempt as a probe.
 - Do not run shell preflight checks for credentials.
   - Do not inspect environment variables, shell profiles, or filesystem files to discover API keys.
-  - Run OCR directly after permission.
   - If OCR indicates auth/config failure, report the error and ask the user to configure `DEEPINFRA_API_KEY` or `api_key` in `config.json` next to the real `pdfocr` binary, then retry.
 - Never read PDFs with direct file readers or ad-hoc parsers.
 - Use full document extraction:
