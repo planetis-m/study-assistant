@@ -75,12 +75,23 @@ def cmd_read(args: argparse.Namespace) -> int:
         print(f"Error: raw cache file not found: {raw_path}", file=sys.stderr)
         return EXIT_CACHE_MISS
 
-    texts = [
-        json.loads(line)["text"]
-        for line in raw_path.read_text(encoding="utf-8").splitlines()
-        if line.strip()
-    ]
-    print(to_json({"ok_text_concat": "\n\n".join(texts)}))
+    lines = [line.strip() for line in raw_path.read_text(encoding="utf-8").splitlines() if line.strip()]
+    
+    filename = Path(args.pdf_input).name
+    total_pages = len(lines)
+    
+    result = [f"File: {filename} | Pages: {total_pages}"]
+    
+    for i, line in enumerate(lines):
+        obj = json.loads(line)
+        # Attempt to read 'page' from JSONL, fallback to index + 1 if absent
+        page_num = obj.get("page", i + 1)
+        text = obj.get("text", "").strip()
+        
+        result.append(f"\n<page n={page_num}>\n{text}\n</page>")
+
+    # Print pure formatted text for the LLM to read directly from stdout
+    print("\n".join(result))
     return EXIT_OK
 
 def build_parser() -> argparse.ArgumentParser:

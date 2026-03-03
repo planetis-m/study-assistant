@@ -7,8 +7,6 @@ description: Study assistant workflow for lecture-slide exam prep using the `pdf
 
 Follow this workflow exactly to convert lecture material into exam-ready outputs.
 
-Absolute rule: for PDF inputs, never call `read_file` on `.pdf` files. Use shell checks plus `pdfocr` only.
-
 ## Available scripts
 
 - `scripts/ocr_cache.py` - Manages OCR cache operations (`check`, `store`, `read`).
