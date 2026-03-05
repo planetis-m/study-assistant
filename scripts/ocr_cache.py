@@ -21,9 +21,13 @@ CACHE_DIR = Path(".study-assistant-cache")
 DEFAULT_PAGE_SEL = "all-pages"
 
 
+def eprint(message: str) -> None:
+    print(f"ocr-cache: {message}", file=sys.stderr)
+
+
 def build_raw_path(pdf_input: str, page_sel: str) -> Path:
     if not pdf_input.strip():
-        print("Error: --pdf-input cannot be empty.", file=sys.stderr)
+        eprint("--pdf-input cannot be empty")
         sys.exit(EXIT_INVALID_ARGS)
 
     pdf_norm = str(Path(pdf_input).expanduser().resolve())
@@ -65,13 +69,12 @@ def cmd_read(args: argparse.Namespace) -> int:
     raw_path = build_raw_path(args.pdf_input, args.page_sel)
 
     if not raw_path.exists() or raw_path.stat().st_size == 0:
-        print("Status: Cache miss.", file=sys.stderr)
+        eprint("miss")
         return EXIT_CACHE_MISS
 
     lines = [l.strip() for l in raw_path.read_text(encoding="utf-8").splitlines() if l.strip()]
     pages, _ = parse_lines(lines)
 
-    print("Status: Cache hit.", file=sys.stderr)
     print_formatted(Path(args.pdf_input).name, pages)
     return EXIT_OK
 
@@ -84,7 +87,7 @@ def cmd_store(args: argparse.Namespace) -> int:
     pages, is_perfect = parse_lines(lines)
 
     if not pages:
-        print("Error: No valid text extracted.", file=sys.stderr)
+        eprint("no valid OCR text")
         return EXIT_CACHE_MISS
 
     if is_perfect:
@@ -96,9 +99,9 @@ def cmd_store(args: argparse.Namespace) -> int:
             f.write(data)
             tmp_path = f.name
         os.replace(tmp_path, raw_path)
-        print("Status: OCR perfect, cached.", file=sys.stderr)
+        eprint("cached")
     else:
-        print(f"Status: OCR had errors, NOT cached ({len(pages)} valid pages).", file=sys.stderr)
+        eprint(f"partial OCR; not cached ({len(pages)} valid pages)")
 
     print_formatted(Path(args.pdf_input).name, pages)
     return EXIT_OK
@@ -128,7 +131,7 @@ def main() -> int:
     except BrokenPipeError:
         return EXIT_OK
     except Exception as exc:
-        print(f"Error: unexpected failure: {exc}", file=sys.stderr)
+        eprint(f"unexpected failure: {exc}")
         return EXIT_RUNTIME_ERROR
 
 
