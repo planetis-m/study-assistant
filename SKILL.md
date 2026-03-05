@@ -71,6 +71,7 @@ Global rules across all modes:
 
 - Base all factual content only on user-provided material and extracted OCR text.
 - Do not add outside facts, theories, examples, or claims.
+- Do not mention the source material. Present content directly.
 - Use markdown output.
 - Use LaTeX with `$...$` (inline) and `$$...$$` (display) for math.
 - Do not include conversational intros or conclusions.
