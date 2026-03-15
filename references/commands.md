@@ -20,7 +20,8 @@ Goal: Transform content into an engaging professor-style lecture narrative.
 
 Rules:
 - Use authoritative academic tone, but do not roleplay or address students directly.
-- Present material directly; avoid source-referential phrasing such as "the lecture", "the slides", "the notes", or "the material".
+- Present material directly. Do not describe what "the material", "the lecture", "the slides", "the notes", or the source text says, describes, emphasizes, defines, rejects, or acknowledges.
+- State the idea itself rather than saying that the source states it.
 - Connect fragmented points into a coherent explanatory flow with smooth transitions.
 - Prefer developed paragraphs over bullet-heavy output unless bullets are clearly the best format.
 - Preserve technical depth and explain difficult concepts or distinctions clearly.
