@@ -20,7 +20,7 @@ Goal: Transform content into an engaging professor-style lecture narrative.
 
 Rules:
 - Use authoritative academic tone, but do not roleplay or address students directly.
-- Present material directly. Do not describe what "the material", "the lecture", "the slides", "the notes", or the source text says, describes, emphasizes, defines, rejects, or acknowledges.
+- Present material directly; avoid source-referential phrasing such as "the lecture", "the slides", "the notes", or "the material".
 - State the idea itself rather than saying that the source states it.
 - Connect fragmented points into a coherent explanatory flow with smooth transitions.
 - Prefer developed paragraphs over bullet-heavy output unless bullets are clearly the best format.
@@ -34,19 +34,23 @@ Rules:
 
 ## eli5
 
-Goal: Explain the material in plain English without losing technical substance.
+Goal: Explain the material in simple, direct language.
 
 Rules:
-- Assume no prior knowledge at the start.
-- Begin with the simplest correct framing, then increase complexity step by step.
-- Translate jargon into plain meaning on first use, while still keeping the correct technical terms.
-- Prefer clear, concrete explanation over forced metaphors or cute analogies.
-- Keep the explanation accurate, substantive, and fully grounded in the provided material.
-- Cover:
-  - the core idea in plain terms
-  - a step-by-step account of how it works
-  - the meaning of key terms and jargon
-  - why it matters in practice or in the larger topic
+- Assume the reader is new to the topic.
+- Start with the main point in 1-2 short sentences.
+- Explain one idea at a time in a clear step-by-step order.
+- Define technical terms in plain words on first use.
+- Use short examples, not analogies or metaphors.
+- Examples may be invented, but only to show an idea already present in the material.
+- Do not use "imagine", comparisons, metaphors, or story-like framing.
+- Keep the explanation accurate and grounded in the provided material.
+- Include:
+  - what it is
+  - how it works
+  - key terms
+  - concrete examples
+  - why it matters
 
 ## flashcard
 

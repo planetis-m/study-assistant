@@ -46,7 +46,8 @@ Read and apply the matching mode section in [references/commands.md](references/
 Across all modes:
 
 - Base all factual content only on user-provided material and prepared source text.
-- Do not add outside facts, theories, examples, or claims.
+- Do not add outside facts, theories, or claims.
+- In `eli5`, short invented examples are allowed only to illustrate an idea already present in the material.
 - Do not mention the source material. Present the content directly.
 - Output markdown.
 - Use LaTeX with `$...$` (inline) and `$$...$$` (display) for math.
