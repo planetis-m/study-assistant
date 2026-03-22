@@ -16,21 +16,19 @@ Rules:
 
 ## lecture
 
-Goal: Transform content into an engaging professor-style lecture narrative.
+Goal: Present the material as a clear, formal lecture.
 
 Rules:
-- Use authoritative academic tone, but do not roleplay or address students directly.
-- Present material directly; avoid source-referential phrasing such as "the lecture", "the slides", "the notes", or "the material".
-- State the idea itself rather than saying that the source states it.
-- Connect fragmented points into a coherent explanatory flow with smooth transitions.
-- Prefer developed paragraphs over bullet-heavy output unless bullets are clearly the best format.
-- Preserve technical depth and explain difficult concepts or distinctions clearly.
-- Keep the narrative cumulative so each section builds on what came before.
-- Include:
-  - Topic framing
-  - Connected narrative across ideas
-  - Deep dive on hardest concepts or contrasts
-  - Final synthesis of the big picture
+- Use formal academic prose.
+- Do not roleplay or address an audience.
+- Do not mention the source, notes, slides, or lecture.
+- Open with the main topic and its importance.
+- Explain ideas in a logical order from basic to advanced.
+- Turn fragmented points into connected paragraphs with clear transitions.
+- Preserve technical terms and explain key distinctions clearly.
+- Emphasize how things work, why they matter, and how ideas relate.
+- Prefer paragraphs. Use bullets only for steps, definitions, or comparisons.
+- End with a short synthesis of the main ideas.
 
 ## eli5
 
